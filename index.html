@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Niki's Sports Calendar 🏸🎾💪</title>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --card: #1a1a24;
+    --card-hover: #22223a;
+    --accent-tennis: #a3e635;
+    --accent-badminton: #38bdf8;
+    --accent-fitness: #f472b6;
+    --text: #e4e4e7;
+    --text-dim: #71717a;
+    --border: #27272a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+    padding-bottom: 80px;
+  }
+
+  .header {
+    text-align: center;
+    padding: 24px 0 8px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .header .subtitle {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .nav {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+
+  .nav button {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .nav button:hover, .nav button.active {
+    background: var(--card-hover);
+    border-color: #444;
+  }
+
+  .nav button.active {
+    border-color: var(--accent-tennis);
+    color: var(--accent-tennis);
+  }
+
+  .week-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  .week-nav button {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+
+  .week-nav button:hover {
+    color: var(--text);
+    background: var(--card);
+  }
+
+  .week-nav .week-label {
+    font-size: 15px;
+    font-weight: 600;
+    min-width: 180px;
+    text-align: center;
+  }
+
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin: 12px 0 8px;
+  }
+
+  .day-header {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    padding: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .day-cell {
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .day-cell:hover { background: var(--card); }
+  .day-cell.today { background: var(--card); font-weight: 700; }
+  .day-cell.today::after {
+    content: '';
+    display: block;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent-tennis);
+    margin: 2px auto 0;
+  }
+
+  .day-cell.selected {
+    background: var(--accent-tennis);
+    color: var(--bg);
+    font-weight: 700;
+  }
+
+  .day-cell .dot-row {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+    margin-top: 3px;
+    height: 5px;
+  }
+
+  .day-cell .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+  }
+
+  .dot.tennis { background: var(--accent-tennis); }
+  .dot.badminton { background: var(--accent-badminton); }
+  .dot.fitness { background: var(--accent-fitness); }
+
+  .events-section {
+    margin-top: 16px;
+  }
+
+  .date-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+
+  .event-card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .event-card:hover { background: var(--card-hover); }
+  .event-card.tennis { border-left-color: var(--accent-tennis); }
+  .event-card.badminton { border-left-color: var(--accent-badminton); }
+  .event-card.fitness { border-left-color: var(--accent-fitness); }
+
+  .event-time {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .event-title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .event-detail {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .event-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  .event-tag.tennis { background: rgba(163,230,53,0.15); color: var(--accent-tennis); }
+  .event-tag.badminton { background: rgba(56,189,248,0.15); color: var(--accent-badminton); }
+  .event-tag.fitness { background: rgba(244,114,182,0.15); color: var(--accent-fitness); }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 40px 20px;
+    font-size: 14px;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 16px 0;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .stat-card:nth-child(1) .stat-number { color: var(--accent-tennis); }
+  .stat-card:nth-child(2) .stat-number { color: var(--accent-badminton); }
+  .stat-card:nth-child(3) .stat-number { color: var(--accent-fitness); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏅 Niki's Sports Calendar</h1>
+  <div class="subtitle">Powered by Lumi 🌟</div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-tennis)"></div> Tennis</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-badminton)"></div> Badminton</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-fitness)"></div> Fitness</div>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="nav" id="filterNav">
+  <button class="active" data-filter="all">All</button>
+  <button data-filter="tennis">🎾 Tennis</button>
+  <button data-filter="badminton">🏸 Badminton</button>
+  <button data-filter="fitness">💪 Fitness</button>
+</div>
+
+<div class="week-nav">
+  <button id="prevWeek">‹</button>
+  <div class="week-label" id="weekLabel"></div>
+  <button id="nextWeek">›</button>
+</div>
+
+<div class="week-grid" id="weekDayHeaders"></div>
+<div class="week-grid" id="weekGrid"></div>
+
+<div class="events-section" id="events"></div>
+
+<script>
+const CHINA_HOLIDAYS_2026 = [
+  '2026-01-01','2026-01-02','2026-01-03',
+  '2026-02-17','2026-02-18','2026-02-19','2026-02-20','2026-02-21','2026-02-22','2026-02-23',
+  '2026-04-05','2026-04-06','2026-04-07',
+  '2026-05-01','2026-05-02','2026-05-03','2026-05-04','2026-05-05',
+  '2026-05-31','2026-06-01','2026-06-02',
+  '2026-10-01','2026-10-02','2026-10-03','2026-10-04','2026-10-05','2026-10-06','2026-10-07'
+];
+
+function dateStr(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function isHoliday(d) {
+  return CHINA_HOLIDAYS_2026.includes(dateStr(d));
+}
+
+function getEventsForDate(d) {
+  const ds = dateStr(d);
+  const dow = d.getDay();
+  const events = [];
+  const holiday = isHoliday(d);
+
+  // One-off events
+  if (ds === '2026-03-14') {
+    events.push({ time: '14:00–15:00', title: 'Tennis class with Yue', detail: 'One-time earlier slot', type: 'tennis', emoji: '🎾' });
+  }
+  if (ds === '2026-03-15') {
+    events.push({ time: '11:50', title: 'Tennis with Zoe', detail: '上海市徐汇区文定路218号B栋1楼150室(画家街室内馆)', type: 'tennis', emoji: '🎾' });
+  }
+  if (ds === '2026-03-16') {
+    events.push({ time: '12:20–13:20', title: 'Fitness class', detail: '健身 — remember gym clothes!', type: 'fitness', emoji: '💪' });
+    events.push({ time: '19:00–20:00', title: 'Tennis with friends', detail: '', type: 'tennis', emoji: '🎾' });
+  }
+  if (ds === '2026-03-18') {
+    events.push({ time: '13:00–14:00', title: 'Tennis class', detail: 'First class! (one-time 1-2 PM slot)', type: 'tennis', emoji: '🎾' });
+  }
+
+  // Recurring events (skip holidays)
+  if (!holiday) {
+    if (dow === 2) { // Tuesday
+      events.push({ time: '12:00–13:00', title: 'Badminton with colleagues', detail: 'Weekly recurring', type: 'badminton', emoji: '🏸' });
+    }
+    if (dow === 3 && d >= new Date('2026-03-25')) { // Wednesday (from 3/25 onward)
+      events.push({ time: '12:00–13:00', title: 'Tennis class', detail: 'Weekly recurring', type: 'tennis', emoji: '🎾' });
+    }
+    if (dow === 4) { // Thursday
+      events.push({ time: '12:00–13:00', title: 'Badminton with colleagues', detail: 'Weekly recurring', type: 'badminton', emoji: '🏸' });
+    }
+    if (dow === 6 && ds !== '2026-03-14') { // Saturday (regular time, except 3/14)
+      events.push({ time: '20:00–21:00', title: 'Tennis class with Yue', detail: 'Weekly recurring', type: 'tennis', emoji: '🎾' });
+    }
+  }
+
+  return events.sort((a, b) => a.time.localeCompare(b.time));
+}
+
+// State
+const today = new Date(2026, 2, 14); // March 14, 2026 (Saturday)
+let currentWeekStart = getMonday(today);
+let selectedDate = today;
+let activeFilter = 'all';
+
+function getMonday(d) {
+  const dt = new Date(d);
+  const day = dt.getDay();
+  const diff = dt.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(dt.setDate(diff));
+}
+
+function formatDate(d) {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+}
+
+function formatWeek(start) {
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if (start.getMonth() === end.getMonth()) {
+    return `${months[start.getMonth()]} ${start.getDate()}–${end.getDate()}, ${start.getFullYear()}`;
+  }
+  return `${months[start.getMonth()]} ${start.getDate()} – ${months[end.getMonth()]} ${end.getDate()}`;
+}
+
+function renderStats() {
+  // Count this week's events
+  let tennis = 0, badminton = 0, fitness = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(currentWeekStart);
+    d.setDate(d.getDate() + i);
+    getEventsForDate(d).forEach(e => {
+      if (e.type === 'tennis') tennis++;
+      if (e.type === 'badminton') badminton++;
+      if (e.type === 'fitness') fitness++;
+    });
+  }
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card"><div class="stat-number">${tennis}</div><div class="stat-label">Tennis this week</div></div>
+    <div class="stat-card"><div class="stat-number">${badminton}</div><div class="stat-label">Badminton</div></div>
+    <div class="stat-card"><div class="stat-number">${fitness}</div><div class="stat-label">Fitness</div></div>
+  `;
+}
+
+function renderWeek() {
+  const headers = document.getElementById('weekDayHeaders');
+  const grid = document.getElementById('weekGrid');
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  headers.innerHTML = dayNames.map(d => `<div class="day-header">${d}</div>`).join('');
+
+  let cells = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(currentWeekStart);
+    d.setDate(d.getDate() + i);
+    const ds = dateStr(d);
+    const isToday = ds === dateStr(today);
+    const isSelected = ds === dateStr(selectedDate);
+    const events = getEventsForDate(d);
+    const filtered = activeFilter === 'all' ? events : events.filter(e => e.type === activeFilter);
+
+    const dots = [...new Set(filtered.map(e => e.type))].map(t => `<div class="dot ${t}"></div>`).join('');
+
+    cells += `<div class="day-cell ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" onclick="selectDate('${ds}')">
+      ${d.getDate()}
+      <div class="dot-row">${dots}</div>
+    </div>`;
+  }
+  grid.innerHTML = cells;
+
+  document.getElementById('weekLabel').textContent = formatWeek(currentWeekStart);
+}
+
+function renderEvents() {
+  const container = document.getElementById('events');
+  const events = getEventsForDate(selectedDate);
+  const filtered = activeFilter === 'all' ? events : events.filter(e => e.type === activeFilter);
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="date-label">${formatDate(selectedDate)}</div>
+      <div class="empty-state">No ${activeFilter === 'all' ? 'sports' : activeFilter} activities 🏖️<br>Rest day!</div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="date-label">${formatDate(selectedDate)}${isHoliday(selectedDate) ? ' 🎉 Public Holiday' : ''}</div>
+    ${filtered.map(e => `
+      <div class="event-card ${e.type}">
+        <div class="event-time">${e.emoji} ${e.time}</div>
+        <div class="event-title">${e.title}</div>
+        ${e.detail ? `<div class="event-detail">${e.detail}</div>` : ''}
+        <span class="event-tag ${e.type}">${e.type}</span>
+      </div>
+    `).join('')}
+  `;
+}
+
+function selectDate(ds) {
+  const [y, m, d] = ds.split('-').map(Number);
+  selectedDate = new Date(y, m - 1, d);
+  render();
+}
+
+function render() {
+  renderStats();
+  renderWeek();
+  renderEvents();
+}
+
+// Navigation
+document.getElementById('prevWeek').addEventListener('click', () => {
+  currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+  selectedDate = new Date(currentWeekStart);
+  render();
+});
+
+document.getElementById('nextWeek').addEventListener('click', () => {
+  currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+  selectedDate = new Date(currentWeekStart);
+  render();
+});
+
+// Filters
+document.querySelectorAll('#filterNav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#filterNav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+// Touch swipe support
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const diff = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(diff) > 80) {
+    if (diff > 0) {
+      currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+      selectedDate = new Date(currentWeekStart);
+    } else {
+      currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+      selectedDate = new Date(currentWeekStart);
+    }
+    render();
+  }
+});
+
+render();
+</script>
+</body>
+</html>
