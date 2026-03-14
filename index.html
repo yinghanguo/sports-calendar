@@ -338,6 +338,9 @@ function getEventsForDate(d) {
   const holiday = isHoliday(d);
 
   // One-off events
+  if (ds === '2026-03-11') {
+    events.push({ time: '12:00–13:00', title: 'Tennis class', detail: '', type: 'tennis', emoji: '🎾' });
+  }
   if (ds === '2026-03-14') {
     events.push({ time: '14:00–15:00', title: 'Tennis class with Yue', detail: 'One-time earlier slot', type: 'tennis', emoji: '🎾' });
   }
